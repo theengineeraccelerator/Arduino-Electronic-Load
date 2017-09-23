@@ -1,0 +1,147 @@
+Arduino Electronic Load - Test List Version 1
+
+Features:
+
+Arduino: 
+Test 1: Test that Arduino Development board works by connecting arduino to computer using USB cable 
+		and seeing that it runs the Blink Program. 
+		Acceptance Criteria: LED on arduino board blinks. 
+Test 2: Test all GPIO's used in system, this includes analog and digital input/output pins by reading 
+		and writing to this pins by writing a small program. Also, test that power pins are giving 
+		correct output voltage. Use multimeter or oscilloscope to read output Voltages. 
+		Acceptance Criteria: Voltages that are given by progam as input and output are correctly 
+		read on multimeter or oscilloscope. 
+		
+Current Dial: 
+Test 1: Check that dial can smoothly turn clockwise and counterclockwise with no hiccups for 100 
+        revolutions each way. 
+		Acceptance Criteria: Dial does not get stuck after 100 revolutions. 
+Test 2: Test that output current increases/decreases when dial is turned clockwise/counterclockwise using Arduino serial monitor
+		and multimeter/oscilloscope. Probe a test point on circuit board where expected current ouput is 
+        coming from. 
+		Acceptance Criteria: Current does not decrease/increase when dial is turned clockwise/counterclockwise. 
+Test 3: Check that current is increasing/decreasing at a constant rate by checking expected current output after each revolution
+		and crossreferencing with hand calculations. Check output using Arduino Serial Monitor, multimeter/oscilloscope
+		Acceptance Criteria: Rate does not change in between and remains constant while increasing or decreasing current. 
+		
+Test 4: Check that the current can be set from 0A to 2A. Test using serial monitor, multimeter/oscilloscope. 
+		Acceptance Criteria: Current ranges from 0A to 2A. 
+		
+DUT: 
+Test 1: Test that voltage can be measured from its output terminals using actual arduino electronic load program and checking 
+		output on serial monitor. Check that voltage is correct by measuring voltage across device's output terminal using
+		multimeter/oscilloscope. This means device is connected properly to system. 
+		Acceptance Criteria: Voltage from source is read correctly. 
+
+Overload Protection: 
+Test 1: Test that current is cut from source when overload protection is activated. Test can be done through hardware or software. 
+		A voltage can be provided by a source that is over the maximum that is allowed by the system. A temperature that is over the limit
+		that is allowed by the system can be introduced to the heat sink. A current that is over the limit is allowed by the system can be 
+		introduced to the system. If done through software a small program can be written to adjust the current, voltage, and temperature 
+		limits that will cut the current coming from the source by a signal provided by the Arduino. 
+		Acceptance Criteria: Current is cut from source when voltage, current, temperature limits set in arduino are exceeded. 
+		
+Current Sink Driver: 
+Test 1: Check that there is an output voltage and that the voltage varies. Voltage should vary when dial is turned clockwise/counterclockwise. 
+		Measure output voltage using multimeter/Oscilliscope. Output voltage can also be read through arduino. 
+		Accepted Criteria: Output voltage ranges from 0V to a maximum voltage. 
+		
+Current Sink:
+Test 1: Check current output when current sink is shut off or turned on. Measure current using multimeter/oscilloscope. Output current can also 
+		be given to Arduino as input and read through serial monitor.
+		Accepted Criteria: No current from current sink when 0A is specified by the user and known current value from current sink when user specifies a 
+		current valiw above 0A. 
+		
+Current sensor: 
+Test 1: Feed a current value to current sensor using arduino and read current value using arduino or multimeter/oscilloscope. 
+		Accepted Criteria: Current value on output is the same as input
+		
+Voltage sensor: 
+Test 1: Feed a voltage value to current sensor using arduino and read current value using arduino or multimeter/oscilloscope. 
+		Accepted Criteria: Voltage value on output is the same as input. 
+		
+Temperature sensor: 
+Test 1: Put system in a heated room with a temperature monitor. Read temperature from temperature sensor using Arduino serial monitor and cross-reference
+		with temperature monitor in room. 
+		Accepted Criteria: Temperature sensed matches the temperature in temperature monitor. 
+		
+Heat sink: 
+Test 1: Make sure heat transfers to heat sink by heating up heat sink with external source such as a butane torch in close proximity. 
+		Verify that temperature increases in heat sink using a thermometer. 
+		Accepted Criteria: Temperature increases up to 100 degrees. 
+		
+Fan Driver: 
+Test 1: Check that there is an output voltage equal to the voltage necessary to drive the fan. Voltage should remain constant. 
+		Measure output voltage using multimeter/Oscilliscope. Output voltage can also be read through arduino. 
+		Accepted Criteria: Voltage remains constant and is equal to the voltage required to power up the fan. 
+		
+Fan: 
+Test 1: Check that the fan turns on/off and blades spin. 
+		Measure input voltage to the fan using multimeter/oscilloscope or arduino. 
+		Accepted Criteria: Measured input voltage is the same from fan spec sheet. 
+		
+LED: 
+Test 1: check that LED turns on and off by progamming the LED by the use of the Arduino. Measure voltage and current from LED and make sure 
+		it is below the Max values from spec sheet. 
+		Accepted Criteria: LED visually turns on and off 
+		
+Computer:
+Test 1: Check that computer communicates with computer by running blink program. 
+		Ensure that serial monitor works by sending and receiving test signals through COM port using the arduino. 
+		Accepted Criteria: Established communication between computer and arduino. Values can be sent and read. 
+		
+Behaviors: 
+SETUP:
+Test 1: Check to see that user interface display is cleared and values go to zero when arduino board is reset. 
+		Check that no signal is on output of dial. 
+		Check that no current signal is coming from source. 
+		Measure signals using multimeter/oscilloscope. 
+		Accepted Criteria: All values and user interface is cleared. No readings should be coming from dial 
+		and no current reading should be coming from source. 
+
+MEASURE AND CHECK: 
+Test 1: Ensure that current is being read from current sensor. 
+		Ensure that voltage coming from source is being read from voltage sensor. 
+		Ensure that temperature from heat sink is being read from temperature sensor. 
+		Ensure that all measured values are being sent and displayed on serial monitor. 
+		Accepted Criteria: All measured values are correct and displayed on serial monitor
+Test 2: Change current, voltage, and temperature limit values to smaller value to check that arduino program is
+		detecting that the limits have been reached. 
+		Accepted Criteria: Program responds to limits being reached. 
+Test 3: Check to see that the appropriate overloading sequence is executed. Overvoltage and overcurrent should 
+		enable current coming from source to be blocked. Overtemperature should enable the fan to turn on. 
+		Accepted Criteria: Current should be cut from source and fan should turn on. 
+		
+IDLE: 
+Test 1: Check to see that measurement is stopped on serial monitor. Ensure that arduino is not receiving a current value
+		from current sensor. 
+		Accepted Criteria: No current value is displayed on serial monitor
+Test 2: Check that commands work that user inputs in serial monitor. Serial Monitor should readback the respective command 
+		that the user enters. 
+		Accepted Criteria: Result is seen on serial monitor
+Test 3: Check to see that adjusting the dial changes the current set value. 
+		Accepted Criteria: Current value increases by turning clockwise on the dial. Current value decreases by turning 
+		counterclockwise on the dial.
+
+Interface: 
+Arduino <---> Computer
+Test 1: Test all GPIO's used in system, this includes analog and digital input/output pins by reading 
+		and writing to this pins by writing a small program. Also, test that power pins are giving 
+		correct output voltage. Use Serial monitor to input and output Voltages. 
+		Acceptance Criteria: Voltages that are given by progam as input and output are correctly 
+		displayed on serial monitor. 
+Test 2: Check that computer communicates with computer by running blink program. 
+		Ensure that serial monitor works by sending and receiving test signals through COM port using the arduino. 
+		Accepted Criteria: Established communication between computer and arduino. Values can be sent and read. 
+		
+		
+
+		
+
+
+
+		
+		
+
+
+
