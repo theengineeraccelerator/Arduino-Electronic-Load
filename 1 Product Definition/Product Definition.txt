@@ -1,0 +1,263 @@
+﻿Arduino Electronic Load Version 2
+
+Introduction
+This project is a commercially cheaper and simpler electronic load with some improvements on vesrion 1 
+
+Conventions
+Red Text: A To-Be-Determined requirement. Color set by the Comments element type
+[ ... ]: Future Feature. Color set by the Identifier element type
+CAPITAL TEXT: Text to be replaced with product specific names
+
+Product Characteristics
+	- Must interface with serial monitor of Arduino Uno 
+    - Must incorporate a heat sink and a fan
+    - Must authomatically interupt intimes of over loading
+	- Must be portable
+    - Weight: 3 pounds
+    - Height (X): 4in
+    - Length (Y): 6 in
+    - Width (Z): 6 in
+    - Target Cost: Cheap. Equal to or less than $50.00
+    - Product Life Time Target: 5 years
+    - Operating Temperature: commercial temperature range
+
+Devices
+Arduino Based Electronic Load 
+  Feature List
+
+           		
+	Current Dial
+		Characteristics
+			- Analog dial
+			- Sets current that is going to be drawn from the device under test
+			- Fine adjustment between values of current to be set (+/- 0.25A) 
+
+	Source Under Test
+		Characteristics
+			- Power Source
+			- Provides the current and voltage for investigating trough the electronic signal 
+			- Has a voltage across it that can be measured and provided to the user
+			- Output voltage:0.0V to 48.0V 
+			- output current: Up to 2A
+	
+	Overload Interupter
+		Characteristics  
+			- Protects load from overloading with exessive voltage
+			- Disconnects the source from the load through a digital switching system
+			- Protects components found on board from overloading
+			
+	Current Sink Driver
+		Characteristics
+			- Provides necessary power to drive the current sink  
+			- Regulates the power driven to the current sink
+			- Controls how much current passes through current sink  //MK - What type of control? Linear? PWM? Other
+	
+	Current Sink
+		Characteristics
+			- Sinks current from the Device Under Test(source)
+			- Range: 0 - 2A/ 0-5A
+			- Adjusts how much current passes through
+	
+	Current sensor
+		Characteristics
+			- Senses current from CURRENT SINK stage    
+			- Max Current: 3A/5A
+			- Accuracy: 1%
+	
+	Voltage sensor
+		Characteristics
+			- Senses voltage from device under test(source)
+			- 0.0-48V 
+			- Accuracy: 1%
+	
+	Temperature sensor
+		Characteristics
+			- Senses temperature from heat sink
+			- Commercial temperature range
+			- Accuracy: 1%
+	
+	Heat Sink
+		Characteristics
+			- Sinks the heat from current sink stage
+			- Normally controlls the heat to keep it at less than 150.0F  
+	
+	Fan Control  
+		Characteristics
+			- Controls operation of fan
+			- Compares signal from temperature sensor to temperature limit set in Arduino
+			- Turns on/off signal to fan depending on temperature of heat sink and temperature limit
+			
+	Fan Driver
+		Characteristics
+			- Provides necessary power to drive the Fan
+			
+	Fan	
+		Characteristics
+			- Cools down heat sink and circuit board
+					
+		
+	3 LED System
+		Characteristics
+			- Red,Yellow and Green LEDs
+            - Green LED indicates normal operation of the loading as specified in the Arduino
+            - Yellow LED indicates a range in which the source is closer to over loading (A range specified in the Arduino)
+			- RED displaying over loading and hence source has been interrupted
+	Computer
+		Characteristics
+			- Uses Arduino serial monitor for display
+			- Displays current to be drawn, set by user
+			- Displays load current 
+			- Logs load current versus time
+			- User interface for controlling using serial monitor 
+            - Power ARDUINO using USB cable within the operating voltage range
+	Arduino
+        Characterstics
+            - Delivers power to different circuit blocks as per their rating
+            - Controlls the normal operation of the testing device and send signal to display using LED system
+			- Receives temperature signal from TEMPERATURE SENSOR 
+            - Sends Turn ON/OFF signal to the fun system based on temperature level
+			- Receives sensed Current from CURRENT SENSOR and sends to COMPUTER
+			- Receives sensed volatage from VOLTAGE SENSOR and sends to COMPUTER
+            - Sends signal to OVERLOAD INTERUPTER to interupt testing operation during overloading
+Behavior Definition
+	Product States
+	   SOURCE SETUP
+	   SETUP AND WELCOME
+	   SAFETY CHECK
+	   IDLE
+	   MEASURE and CHECK
+	   FAN
+
+	Detailed Behavior
+	  Initial State: SOURCE SETUP
+		Event: Connection
+		      - Connect device under test to electronic load
+		
+	  Initial State: SETUP AND WELCOME
+		Event: ENTRY
+			- Give user command instructions to type in serial monitor
+			- Clear user interface display
+			- Set all values to zero 
+			- Open current dial
+			- Open current trace coming from source using switch found in overload protection block
+			- Change State to WELCOME
+		Event: Safety Check Command
+			- Change state to SAFETY CHECK 
+		
+	
+	  Initial State: SAFETY CHECK  //MK - should this be happening all the time? How would you show that behavior
+		Event: Entry
+			- Send state message to computer
+			- Check sensorVoltage 
+		Event: Measure Command  
+			- Read voltage from voltage sensor
+			- Construct Data Packet
+			- Send to Computer 
+		    - End Measurement  
+		    - Set state to IDLE
+	
+	  Initial State: IDLE
+		Event: Entry
+			- Stop measurement
+			- Send State message to computer
+			- Give usRED and GREENer command instructions to type in serial monitor
+		Event: measure command 
+			- Change state to MEASURE AND CHECK
+		Event: Dial is turnd clockwise 
+			- increases current setpoint 
+		Event: Dial is turned counterclockwise
+			- decreases current setpoint
+		Event: Command Set Mode
+			- Change measurementMode
+		Event: Safety Check Command
+			- Change state to SAFETY CHECK
+		
+	  Initial State: MEASURE AND CHECK
+		Event: Entry
+			- Check measurementMode
+			- Start Timer
+		Event: Current is over the operating range
+			- Read current from current sensor
+				If Current >= 10A go to Overload Protection (Interuption) state
+                    - Turn on RED LED light, turn off YELLOW and GREEN LEDs  
+                    - Interupt the flow of current from the source
+        Event: Current is within the operating range
+				If Current >=9.0A and < 10A continue
+			        - Construct Data Packet
+			        - Send to Computer
+			        - Display value on serial monitor
+                        - Turn on YELLOW LED light , turn off RED and GREEN LEDs 
+                If Current <9.0A continue
+                    - Construct Data Packet
+			        - Send to Computer
+			        - Display value on serial monitor
+                        - Turn on GREEN LED light , turn off RED and YELLOW LEDs 
+		Event: Temperature change  
+			- Read temperature from heat sink using temperature sensor
+			- Construct Data Packet
+			- Send to Computer
+			- Check if temperature is above temperature limit 
+				- If Yes, go to FAN state 
+				- if No, remain
+	    Event: Sense Voltage 
+		    - Continoulsy measure voltage
+			- Go to SAFETY CHECK state
+		Event: Stop voltage sensing
+		    - End voltage measurement  
+			- Set state to IDLE
+			
+	  Initial State: Overload Protection
+
+		Event: Entry
+			- Open current trace coming from source
+			- Display message "Current Overload" to user
+			- Inform user to decrease current
+			- Go to SAFETY CHECK state
+		 
+	  Initial State: FAN    
+		Event: Entry
+			- Start fanTimer
+		Event: Check FanTimer
+			- Adjust fan speed
+		Event: Check temperatureSensor 
+		    - if above temperature limit   
+				- Turn ON fan
+			- if below temperature limit
+				- Keep fan OFF 
+		Event: End Fan Check
+			- Set state to MEASUREMENT AND CHECK
+
+
+Data Structure
+	Variables
+		- Timer
+		- fanTimer
+		- currentSensor   
+		- currentValue
+		- voltageSensor
+		- voltageValue
+		- temperatureSensor
+		- measurementMode
+	Data Packet 
+		- Voltage
+		- Current
+		- Temperature
+		- Interupt
+Interface List
+	Arduino <--> Computer
+	Characteristics
+		- Serial Monitor based
+	
+	Command Description
+	setmode 		Set Measurement logging mode
+	safetycheck     Checks voltage across source
+	start           Ensures that load is ready to measure
+	measure			Starts measurement
+	end				Ends Measurement
+
+
+
+Security
+Regulation
+Mechanical
+Manufacturing
