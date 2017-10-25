@@ -1,4 +1,4 @@
-﻿Arduino Electronic Load Version 2
+﻿Arduino Based Electronic Load Version 2
 
 Introduction
 This project is a commercially cheaper and simpler electronic load with some improvements on vesrion 1 
@@ -11,7 +11,6 @@ CAPITAL TEXT: Text to be replaced with product specific names
 Product Characteristics
 	- Must interface with serial monitor of Arduino Uno 
     - Must incorporate a heat sink and a fan
-    - Must authomatically interupt intimes of over loading
 	- Must be portable
     - Weight: 3 pounds
     - Height (X): 4in
@@ -40,7 +39,7 @@ Arduino Based Electronic Load
 			- Output voltage:0.0V to 48.0V 
 			- output current: Up to 2A
 	
-	Overload Interupter
+	Overload Protection
 		Characteristics  
 			- Protects load from overloading with exessive voltage
 			- Disconnects the source from the load through a digital switching system
@@ -50,18 +49,18 @@ Arduino Based Electronic Load
 		Characteristics
 			- Provides necessary power to drive the current sink  
 			- Regulates the power driven to the current sink
-			- Controls how much current passes through current sink  //MK - What type of control? Linear? PWM? Other
+			- Controls how much current passes through current sink using a differential principle of non-inverting OP-AMP  
 	
 	Current Sink
 		Characteristics
 			- Sinks current from the Device Under Test(source)
-			- Range: 0 - 2A/ 0-5A
+			- Range: 0-5A
 			- Adjusts how much current passes through
 	
 	Current sensor
 		Characteristics
 			- Senses current from CURRENT SINK stage    
-			- Max Current: 3A/5A
+			- Max Current: 5A
 			- Accuracy: 1%
 	
 	Voltage sensor
@@ -110,15 +109,15 @@ Arduino Based Electronic Load
 			- Logs load current versus time
 			- User interface for controlling using serial monitor 
             - Power ARDUINO using USB cable within the operating voltage range
-	Arduino
+	Arduino/*
         Characterstics
-            - Delivers power to different circuit blocks as per their rating
-            - Controlls the normal operation of the testing device and send signal to display using LED system
-			- Receives temperature signal from TEMPERATURE SENSOR 
-            - Sends Turn ON/OFF signal to the fun system based on temperature level
-			- Receives sensed Current from CURRENT SENSOR and sends to COMPUTER
-			- Receives sensed volatage from VOLTAGE SENSOR and sends to COMPUTER
-            - Sends signal to OVERLOAD INTERUPTER to interupt testing operation during overloading
+            - Uses USB interface for power and signal communication
+            - Controlls the normal operation of the testing device 
+			- Incorporates both ADC and DAC in the processor system
+            - Must be with a processing speed of atleast 16MHz 
+			- Incorporates both analog and digital Input/Output terminals
+			- Communicates with external devices via I2C
+            - Handls at minimum a voltage of 5.0V from and to various devices
 Behavior Definition
 	Product States
 	   SOURCE SETUP
@@ -145,7 +144,7 @@ Behavior Definition
 			- Change state to SAFETY CHECK 
 		
 	
-	  Initial State: SAFETY CHECK  //MK - should this be happening all the time? How would you show that behavior
+	  Initial State: SAFETY CHECK
 		Event: Entry
 			- Send state message to computer
 			- Check sensorVoltage 
@@ -176,13 +175,14 @@ Behavior Definition
 		Event: Entry
 			- Check measurementMode
 			- Start Timer
-		Event: Current is over the operating range
+		Event: Current is over the operating range (over 10A)
 			- Read current from current sensor
 				If Current >= 10A go to Overload Protection (Interuption) state
                     - Turn on RED LED light, turn off YELLOW and GREEN LEDs  
-                    - Interupt the flow of current from the source
+                    - Activate the overload protection
+					- Change state to ERROR state
         Event: Current is within the operating range
-				If Current >=9.0A and < 10A continue
+				If Current >=9.0A and < 10A continue 
 			        - Construct Data Packet
 			        - Send to Computer
 			        - Display value on serial monitor
@@ -212,6 +212,7 @@ Behavior Definition
 			- Open current trace coming from source
 			- Display message "Current Overload" to user
 			- Inform user to decrease current
+			- Turn RED LED on, while turning off GREEN and YELLOW LEDs
 			- Go to SAFETY CHECK state
 		 
 	  Initial State: FAN    
