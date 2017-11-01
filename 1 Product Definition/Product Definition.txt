@@ -1,11 +1,11 @@
 ﻿Arduino Based Electronic Load Version 2
 
 Introduction
-This project is a commercially cheaper and simpler electronic load with some improvements on vesrion 1 
+This project is a commercially cheaper and simpler electronic load for testing power sources
+by varying the load via Arduino Setup
 
 Conventions
-Red Text: A To-Be-Determined requirement. Color set by the Comments element type
-[ ... ]: Future Feature. Color set by the Identifier element type
+
 CAPITAL TEXT: Text to be replaced with product specific names
 
 Product Characteristics
@@ -24,78 +24,74 @@ Devices
 Arduino Based Electronic Load 
   Feature List
 
-           		
-	Current Dial
-		Characteristics
-			- Analog dial
-			- Sets current that is going to be drawn from the device under test
-			- Fine adjustment between values of current to be set (+/- 0.25A) 
+       
 
-	Source Under Test
+	Source Under Test (SUT)
 		Characteristics
 			- Power Source
-			- Provides the current and voltage for investigating trough the electronic signal 
+			- Provides the current and voltage for investigation
 			- Has a voltage across it that can be measured and provided to the user
 			- Output voltage:0.0V to 48.0V 
-			- output current: Up to 2A
+			- output current: Up to 5A
+			- Has a nob to varry the voltage output
 	
 	Overload Protection
 		Characteristics  
 			- Protects load from overloading with exessive voltage
-			- Disconnects the source from the load through a digital switching system
+			- Disconnects the SUT from the load 
+			- Uses a digital switching system
 			- Protects components found on board from overloading
 			
 	Current Sink Driver
 		Characteristics
 			- Provides necessary power to drive the current sink  
 			- Regulates the power driven to the current sink
-			- Controls how much current passes through current sink using a differential principle of non-inverting OP-AMP  
+			- Controls how much current passes through current sink 
+			- Uses differential principle of non-inverting OP-AMP  
 	
 	Current Sink
 		Characteristics
-			- Sinks current from the Device Under Test(source)
+			- Sinks current from the SOURCE UNDER TEST(source)
 			- Range: 0-5A
-			- Adjusts how much current passes through
+			- Adjusts how much current passes through as set in the ARDUINO 
+			- Acts as a variable resistor of the electronic load system 
 	
 	Current sensor
 		Characteristics
-			- Senses current from CURRENT SINK stage    
+			- Senses current through CURRENT SINK stage    
 			- Max Current: 5A
 			- Accuracy: 1%
 	
 	Voltage sensor
 		Characteristics
-			- Senses voltage from device under test(source)
-			- 0.0-48V 
+			- Senses voltage from SOURCE UNDER TEST(source)
+			- 0.0-48.0 V 
 			- Accuracy: 1%
 	
 	Temperature sensor
 		Characteristics
 			- Senses temperature from heat sink
-			- Commercial temperature range
+			- Works at commercial temperature range (32F - 176F)
 			- Accuracy: 1%
 	
 	Heat Sink
 		Characteristics
 			- Sinks the heat from current sink stage
-			- Normally controlls the heat to keep it at less than 150.0F  
-	
-	Fan Control  
-		Characteristics
-			- Controls operation of fan
-			- Compares signal from temperature sensor to temperature limit set in Arduino
-			- Turns on/off signal to fan depending on temperature of heat sink and temperature limit
+			- Normally controlls the heat to keep it at less than 150.0F
+			- Small enough in size to be physically close to CURRENT SINK
 			
 	Fan Driver
 		Characteristics
 			- Provides necessary power to drive the Fan
+			- Switched on/off by digital signal
+			- Comprises of switch to tunr on/off FAN
 			
 	Fan	
 		Characteristics
 			- Cools down heat sink and circuit board
 					
 		
-	3 LED System
+	3 LED Indicators
 		Characteristics
 			- Red,Yellow and Green LEDs
             - Green LED indicates normal operation of the loading as specified in the Arduino
@@ -109,7 +105,7 @@ Arduino Based Electronic Load
 			- Logs load current versus time
 			- User interface for controlling using serial monitor 
             - Power ARDUINO using USB cable within the operating voltage range
-	Arduino/*
+	Arduino
         Characterstics
             - Uses USB interface for power and signal communication
             - Controlls the normal operation of the testing device 
@@ -120,18 +116,33 @@ Arduino Based Electronic Load
             - Handls at minimum a voltage of 5.0V from and to various devices
 Behavior Definition
 	Product States
+	   SYSTEM OFF
 	   SOURCE SETUP
 	   SETUP AND WELCOME
 	   SAFETY CHECK
 	   IDLE
 	   MEASURE and CHECK
+	   ERROR
+	   DISPLAY
+	   TEMPERATURE MEASURE
 	   FAN
 
 	Detailed Behavior
+	  Starting State: SYSTEM OFF
+        Event: Power connection
+            - User conect hardware set up and turn power 
+            - User turns on computer system
+            - Change state to SOURCE SETUP	
+			
 	  Initial State: SOURCE SETUP
 		Event: Connection
-		      - Connect device under test to electronic load
-		
+		    - Connect device under test to electronic load
+		Event: Entry	  
+		    - User enters key on keyboard 
+			- Change state to SETUP AND WELCOME
+			- Turn temperture sensor on
+			- Chnage state to TEMPERATURE MEASURE
+			
 	  Initial State: SETUP AND WELCOME
 		Event: ENTRY
 			- Give user command instructions to type in serial monitor
@@ -159,13 +170,13 @@ Behavior Definition
 		Event: Entry
 			- Stop measurement
 			- Send State message to computer
-			- Give usRED and GREENer command instructions to type in serial monitor
+			- Give user command instructions to type in serial monitor
 		Event: measure command 
 			- Change state to MEASURE AND CHECK
-		Event: Dial is turnd clockwise 
-			- increases current setpoint 
-		Event: Dial is turned counterclockwise
-			- decreases current setpoint
+		Event: Entry
+		    - Give user command instructions to type in serial monitor
+			- User increases current setpoint 
+			- User decrease current setpoint
 		Event: Command Set Mode
 			- Change measurementMode
 		Event: Safety Check Command
@@ -176,57 +187,67 @@ Behavior Definition
 			- Check measurementMode
 			- Start Timer
 		Event: Current is over the operating range (over 10A)
-			- Read current from current sensor
-				If Current >= 10A go to Overload Protection (Interuption) state
-                    - Turn on RED LED light, turn off YELLOW and GREEN LEDs  
-                    - Activate the overload protection
-					- Change state to ERROR state
+		    - Turn on RED LED in 3 LED Indicator
+			- Turn off YELLOW LED in 3 LED Indicator
+            - Turn off GREEN LEDs in 3 LED Indicator  
+            - Activate the overload protection
+		    - Change state to ERROR state           
         Event: Current is within the operating range
-				If Current >=9.0A and < 10A continue 
-			        - Construct Data Packet
-			        - Send to Computer
-			        - Display value on serial monitor
-                        - Turn on YELLOW LED light , turn off RED and GREEN LEDs 
-                If Current <9.0A continue
-                    - Construct Data Packet
-			        - Send to Computer
-			        - Display value on serial monitor
-                        - Turn on GREEN LED light , turn off RED and YELLOW LEDs 
-		Event: Temperature change  
-			- Read temperature from heat sink using temperature sensor
-			- Construct Data Packet
+            - Change state to DISPLAY State
+			
+      Initial State: ERROR
+		Event: Current is Over limit (>10A)
+			- Open current trace coming from source
+			- Display message "Current Overload!" to user
+			- Inform user to decrease current
+		Event: Error re-configuration command 	
+			- Go to IDLE state
+			
+	  Initial State: DISPLAY
+        Event: Entry
+            - Start Timer		
+	    Event: Current is critically close to over loading (>=9.0A and < 10A) )
+		    - Construct Data Packet
 			- Send to Computer
-			- Check if temperature is above temperature limit 
-				- If Yes, go to FAN state 
-				- if No, remain
-	    Event: Sense Voltage 
+			- Display value on serial monitor 
+		    - Turn on YELLOW LED in 3 LED Indicator
+			- Turn off RED LED in 3 LED Indicator
+            - Turn off GREEN LEDs in 3 LED Indicator
+		Event: Current is in normal operating range (<9.0A)
+            - Construct Data Packet
+			- Send to Computer
+			- Display value on serial monitor		
+	        - Turn on GREEN LED in 3 LED Indicator
+			- Turn off RED LED in 3 LED Indicator
+            - Turn off YELLOW LEDs in 3 LED Indicator
+		Event: Sense Voltage 
 		    - Continoulsy measure voltage
 			- Go to SAFETY CHECK state
 		Event: Stop voltage sensing
 		    - End voltage measurement  
-			- Set state to IDLE
+			- Set state to IDLE	
 			
-	  Initial State: Overload Protection
-
-		Event: Entry
-			- Open current trace coming from source
-			- Display message "Current Overload" to user
-			- Inform user to decrease current
-			- Turn RED LED on, while turning off GREEN and YELLOW LEDs
-			- Go to SAFETY CHECK state
+			
+			
+       Initial State: TEMPERATURE MEASURE             
+		Event: Temperature change above limit  
+			- Construct Data Packet
+			- Send to Computer
+			- Go to FAN state
+		Event: Temperature is below limit 		
+			- Construct Data Packet
+			- Send to Computer
+			- Remain in TEMPERATURE MEASURE STATE
+	    
+			
+	  
 		 
 	  Initial State: FAN    
-		Event: Entry
+		Event: Temperature is above limit
 			- Start fanTimer
-		Event: Check FanTimer
-			- Adjust fan speed
-		Event: Check temperatureSensor 
-		    - if above temperature limit   
-				- Turn ON fan
-			- if below temperature limit
-				- Keep fan OFF 
-		Event: End Fan Check
-			- Set state to MEASUREMENT AND CHECK
+            - Turn on the Fan using fan driver
+		Event: Temperature is below the limit
+			- Turn off Fan 
 
 
 Data Structure
